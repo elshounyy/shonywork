@@ -27,9 +27,14 @@ h3{font-size:clamp(40px,10vw,150px);line-height:.95;margin-top:10px}
 .w{display:inline-block;overflow:hidden;vertical-align:top;padding:.14em 0 .06em;margin:-.14em 0 -.06em}
 .w i{display:inline-block;font-style:normal;transform:translateY(115%) rotate(8deg);transition:transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--k)*40ms)}
 .sp.in .w i{transform:none}
-#ld{position:fixed;inset:0;background:#000;z-index:100;display:grid;place-items:center;transition:opacity .5s,visibility .5s}
-#ld.off{opacity:0;visibility:hidden}
-#ld b{font:400 clamp(48px,12vw,140px)/1 var(--g);color:#fff;letter-spacing:.03em}
+#gate{position:fixed;inset:0;z-index:200;background:#050505;display:grid;place-items:center;padding:24px;text-align:center;transition:opacity .8s ease,visibility .8s}
+#gate.off{opacity:0;visibility:hidden}
+#gate .tag{justify-content:center}
+#gate h1{font:400 clamp(48px,11vw,150px)/.95 var(--g);color:#fff;margin:18px 0 30px;text-transform:uppercase}
+#gate h1 em{font-style:normal;color:var(--a)}
+#gate button{font:700 14px Poppins;letter-spacing:.14em;text-transform:uppercase;padding:16px 46px;border-radius:99px;border:1px solid #fff6;background:var(--a);color:#000;cursor:pointer;transition:transform .2s}
+#gate button:hover{transform:scale(1.05)}
+#gate p{font:400 11px var(--m);letter-spacing:.2em;color:#888;margin-top:18px;text-transform:uppercase}
 .bar{position:fixed;left:0;top:0;height:3px;width:0;background:var(--a);z-index:95}
 .ring{position:fixed;left:0;top:0;width:36px;height:36px;margin:-18px 0 0 -18px;border:1.5px solid #fff;border-radius:50%;z-index:99;pointer-events:none;display:none;transition:width .25s,height .25s,margin .25s,background .25s}
 .ring.big{width:70px;height:70px;margin:-35px 0 0 -35px;background:#ffffff26}
@@ -172,11 +177,10 @@ section.light{background:#ececec;color:#111}
  .av{grid-template-columns:1fr 1fr}
  .av .ph:first-child{grid-column:span 2;grid-row:auto}
  nav .l a{display:none}
- .dock{flex-direction:row;left:50%;right:auto;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom,0px));background:#000e;padding:8px 10px;border-radius:99px;border:1px solid #fff3;gap:6px}
- .dock a{width:46px;height:46px;font-size:20px;border:0;background:transparent}
+ .dock{right:12px;bottom:12px;gap:8px}
+ .dock a{width:44px;height:44px;font-size:19px}
  .dock a span{display:none}
  .player span{display:none}
- body{padding-bottom:84px}
 }
 @media(max-width:520px){.idx{grid-template-columns:1fr}section{padding:10vh 5vw}}
 @media(prefers-reduced-motion:reduce){.rv,.w i{opacity:1;transform:none;transition:none}.mq div,.fw .ph,.badge{animation:none}}
@@ -198,7 +202,12 @@ section.light{background:#ececec;color:#111}
 </defs></svg>
 
 <div class="ring"></div><div class="bar"></div>
-<div id="ld"><b>Elshouny</b></div>
+<div id="gate"><div>
+ <div class="tag"><svg class="i f"><use href="#sp"/></svg>Portfolio 2026 / Cairo</div>
+ <h1 class="dist">Abdelrahman<br><em>Elshouny</em></h1>
+ <button id="enter" type="button">Enter</button>
+ <p>Music starts when you enter</p>
+</div></div>
 
 <nav><a class="b" href="#top"><svg class="i f"><use href="#sp"/></svg>A. Elshouny</a><div class="l"><a href="#about">About</a><a href="#work">Work</a><a href="#contact">Contact</a></div></nav>
 
@@ -447,12 +456,20 @@ if(document.fonts)document.fonts.ready.then(fit);
 let fr=0;addEventListener('resize',()=>{clearTimeout(fr);fr=setTimeout(fit,120)});
 
 const au=$('#au'),pl=$('.player'),pb=$('.player button');
-pb.addEventListener('click',()=>{if(au.paused){au.play().catch(()=>{})}else{au.pause()}});
+let userPaused=false;
+pb.addEventListener('click',()=>{if(au.paused){userPaused=false;au.play().catch(()=>{})}else{userPaused=true;au.pause()}});
+const GO=['pointerdown','keydown','wheel','touchstart','scroll'];
+function off(){GO.forEach(ev=>removeEventListener(ev,tryPlay))}
+function tryPlay(){if(userPaused||!au.paused)return;au.play().then(off).catch(()=>{})}
+GO.forEach(ev=>addEventListener(ev,tryPlay,{passive:true}));
+tryPlay();
 au.addEventListener('play',()=>pl.classList.add('on'));
 au.addEventListener('pause',()=>pl.classList.remove('on'));
 au.addEventListener('ended',()=>pl.classList.remove('on'));
 au.addEventListener('error',()=>{pl.classList.remove('on');pl.querySelector('span').textContent='no music.mp3'});
-setTimeout(()=>$('#ld').classList.add('off'),700);
+const gate=$('#gate');
+$('#enter').addEventListener('click',()=>{userPaused=false;au.play().catch(()=>{});gate.classList.add('off');setTimeout(()=>gate.remove(),900)});
+$('#enter').focus();
 </script>
 </body>
 </html>
